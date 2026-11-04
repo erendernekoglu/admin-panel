@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { adminFetch, AdminClientError, isConcurrencyConflict, resourcePath, type AdminRecordDto, type AppPublicationAction, type AppPublicationOutcome, type AppPublicationRequest, type AppPublicationResult, type CollectionDto, type DeleteMediaDto, type EditorialLookContent, type LookDto, type LookCollectionContent, type PublicationAction, type Resource } from "../../lib/admin/client";
 import { assetIdFromPath } from "../../lib/looks/media";
+import { isDemoMode } from "../../../../lib/config";
 import { PENDING_PREFIX, useAdminUid } from "../../actor";
 
 type Content = EditorialLookContent | LookCollectionContent;
@@ -44,6 +45,28 @@ export function contentOf<T extends Content>(record: T & AdminRecordDto): T {
 
 function isUncertain(error: unknown) {
   return !(error instanceof AdminClientError) || error.status === 0 || error.status >= 500;
+}
+
+/**
+ * Draft persistence for the create flow.
+ *
+ * The local preview has no server to reconcile with, so it never writes drafts
+ * to sessionStorage: pending creates stay in memory and disappear on reload.
+ * API mode keeps the existing recovery behaviour for ambiguous responses.
+ */
+function readPendingDraft(key: string): string | null {
+  if (isDemoMode) return null;
+  return sessionStorage.getItem(key);
+}
+
+function writePendingDraft(key: string, value: string): void {
+  if (isDemoMode) return;
+  sessionStorage.setItem(key, value);
+}
+
+function removePendingDraft(key: string): void {
+  if (isDemoMode) return;
+  sessionStorage.removeItem(key);
 }
 
 export function useDirtyGuard(dirty: boolean) {
@@ -92,11 +115,11 @@ export function useEditor<T extends Content>(resource: Resource, initialId: stri
           const draft = contentOf(value);
           setRecord(value); setContent(draft); setBaseline(JSON.stringify(draft));
         } else {
-          const saved = sessionStorage.getItem(storageKey);
+          const saved = readPendingDraft(storageKey);
           const value: PendingCreate<T> = saved ? JSON.parse(saved) : { key: crypto.randomUUID(), content: blank, removedPaths: [] };
           if (!value || typeof value.key !== "string" || !value.content || !Array.isArray(value.removedPaths)) throw new Error("Bu sekmedeki bekleyen taslak okunamadı. Sekmeyi kapatmadan önce gerekli bilgileri kopyalayın.");
           pending.current = value;
-          sessionStorage.setItem(storageKey, JSON.stringify(value));
+          writePendingDraft(storageKey, JSON.stringify(value));
           setContent(value.content); setPreparedId(value.preparedId); setRemovedPaths(value.removedPaths);
           if (value.submittedContent || value.createdId) {
             setUncertain("save");
@@ -115,7 +138,7 @@ export function useEditor<T extends Content>(resource: Resource, initialId: stri
 
   function persist(value: PendingCreate<T>) {
     // Store before sending create requests: retries must survive an ambiguous response/reload.
-    sessionStorage.setItem(storageKey, JSON.stringify(value));
+    writePendingDraft(storageKey, JSON.stringify(value));
     pending.current = value;
   }
 
@@ -144,7 +167,7 @@ export function useEditor<T extends Content>(resource: Resource, initialId: stri
     setPreparedId(value.id);
     setUncertain(null); actionRequest.current = null; appRequest.current = null;
     if (pending.current) {
-      sessionStorage.removeItem(storageKey);
+      removePendingDraft(storageKey);
       pending.current = null;
     }
   }

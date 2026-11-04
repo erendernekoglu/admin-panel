@@ -9,7 +9,7 @@ import { authErrorMessage } from "../lib/auth/authErrors"
 import { isDemoMode } from "../lib/config"
 
 const DEMO_NOTICE =
-  "Örnek veri • Gerçek sisteme bağlı değil • Değişiklikler bu oturumla sınırlıdır"
+  "Yerel önizleme • Sunucuya bağlı değil • Panel boş başlar • Yenilemede girilen kayıtlar silinir"
 
 export default function LoginPage() {
   const { error: authError, enterDemo, loginWithEmail } = useAuth()
@@ -58,15 +58,15 @@ export default function LoginPage() {
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">
           <p className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-line bg-surface-2 px-3 py-1 text-xs font-semibold text-ink-soft">
             <span className="size-1.5 rounded-full bg-signal" />
-            {isDemoMode ? "Örnek veri modu" : "API modu"}
+            {isDemoMode ? "Yerel önizleme" : "API modu"}
           </p>
 
           <h1 className="font-display text-4xl leading-none text-ink">
-            {isDemoMode ? "Örnek panele gir" : "Giriş yap"}
+            {isDemoMode ? "Yerel önizleme" : "Giriş yap"}
           </h1>
           <p className="mt-3 text-sm text-ink-soft">
             {isDemoMode
-              ? "Bu yerel örnek oturumdur; gerçek kimlik doğrulama değildir ve hiçbir istek gönderilmez."
+              ? "Bu panel hiçbir sunucuya bağlı değildir. Tüm ekranlar boş başlar; girdiğiniz kayıtlar yalnızca bu sekmenin belleğinde tutulur ve sayfa yenilendiğinde silinir."
               : "Panel, aynı kaynaklı sunucu oturumunu kullanır. Yönetici rolü sunucuda doğrulanır."}
           </p>
 
@@ -76,11 +76,11 @@ export default function LoginPage() {
                 {DEMO_NOTICE}
               </p>
               <Button className="w-full" onClick={handleDemoEntry} size="lg" type="button" variant="accent">
-                Örnek veriyle gir
+                Boş paneli aç
               </Button>
               <p className="text-xs leading-relaxed text-muted">
-                Örnek erişim sabit bir yönetici rolü kullanır. Bu rol gerçek yetki değildir; API modunda
-                tüm yetkiler sunucu yanıtından okunur.
+                Bu oturum sabit bir yerel yönetici rolü kullanır; gerçek yetki değildir ve arka uçta bir
+                kayıt oluşturmaz. API modunda tüm yetkiler sunucu yanıtından okunur.
               </p>
             </div>
           ) : (

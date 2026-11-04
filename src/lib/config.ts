@@ -1,11 +1,12 @@
 /**
  * Data mode for the independent admin panel.
  *
- * `demo` is the safe default when the variable is absent or empty: every
- * screen renders synthetic, in-memory data and no request leaves the browser.
- * `api` selects the same-origin API adapter. Any other value is a
- * configuration error and stops the app instead of silently falling back to
- * demo, so a typo can never hide a broken live deployment.
+ * `demo` is the safe default when the variable is absent or empty: the panel
+ * opens an empty, memory-only local preview, every screen starts without
+ * records and no request leaves the browser. `api` selects the same-origin API
+ * adapter. Any other value is a configuration error and stops the app instead
+ * of silently falling back to demo, so a typo can never hide a broken live
+ * deployment.
  */
 export type DataMode = "demo" | "api"
 
@@ -38,5 +39,5 @@ function readConfiguredMode(): unknown {
 
 export const dataMode: DataMode = resolveDataMode(readConfiguredMode())
 
-/** True when the panel runs on local synthetic data and must not call a server. */
+/** True when the panel runs an empty local preview and must not call a server. */
 export const isDemoMode: boolean = dataMode === "demo"

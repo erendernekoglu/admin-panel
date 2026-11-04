@@ -44,8 +44,8 @@ function AutumnTheme() {
     <img className="event-phone-theme-art" src={asset('profile-theme-background.svg')} alt="" />
     <div className="event-phone-avatar"><Icon name="person" size={32} /></div>
     <h3>Senin profilin</h3><p className="event-phone-handle">@kullaniciadi</p>
-    <div className="event-phone-progress">{(['sunny', 'flame', 'trophy'] as const).map((name, index) => <div key={name}><Icon name={name} size={20} /><strong>{['120', '7', '14'][index]}</strong></div>)}</div>
-    <div className="event-phone-stats">{['Kombin', 'Parça', 'Takipçi', 'Takip'].map((label, index) => <div key={label}><strong>{['12', '48', '256', '180'][index]}</strong><span>{label}</span></div>)}</div>
+    <div className="event-phone-progress">{(['sunny', 'flame', 'trophy'] as const).map(name => <div key={name}><Icon name={name} size={20} /><strong>0</strong></div>)}</div>
+    <div className="event-phone-stats">{['Kombin', 'Parça', 'Takipçi', 'Takip'].map(label => <div key={label}><strong>0</strong><span>{label}</span></div>)}</div>
   </div>
 }
 // Mirrors EventAboutSections and StyleEventInfoScreen's light-theme layout.

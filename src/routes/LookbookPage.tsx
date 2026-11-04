@@ -123,7 +123,7 @@ export default function LookbookPage({ view = "looks" }: { view?: View }) {
       </>}
     />
     {isDemoMode && <p role="status" className="rounded-xl border border-line bg-surface-2 p-3 text-sm leading-relaxed text-ink-soft">
-      Demo modu: kombinler, koleksiyonlar ve editör oturumu yalnızca bu sekmenin belleğinde tutulur. Değişiklikler sayfa yenilenince başlangıç verisine döner ve hiçbir ağ isteği gönderilmez.
+      Yerel önizleme: panel boş başlar; kombinler, koleksiyonlar ve editör oturumu yalnızca bu sekmenin belleğinde tutulur. Sunucuya bağlı değildir, sayfa yenilenince girilen kayıtlar silinir ve hiçbir ağ isteği gönderilmez.
     </p>}
     <nav aria-label="Lookbook bölümleri" className="inline-flex rounded-full border border-line bg-surface p-1">
       {tabs.map(tab => <Link key={tab.href} to={tab.href} aria-current={tab.current ? "page" : undefined} className={cn(

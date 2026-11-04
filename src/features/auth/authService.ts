@@ -108,15 +108,16 @@ function parseLoginSession(value: unknown): AuthSession {
 }
 
 const DEMO_USER: AdminUser = {
-  uid: "demo-user-01",
-  email: "demo@example.invalid",
-  displayName: "Örnek Yönetici",
+  uid: "preview-admin",
+  email: null,
+  displayName: "Yerel önizleme",
   photoURL: null,
 }
 
 /**
- * Synthetic local session for the explicit demo entry. It is memory-only and
- * is never sent to an API; the role is labelled sample access in the UI.
+ * Local preview session for the explicit empty-panel entry. It is memory-only,
+ * carries no business or team record, and is never sent to an API; the role is
+ * labelled local preview in the UI.
  */
 export function createDemoSession(): AuthSession {
   return {

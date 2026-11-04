@@ -16,7 +16,7 @@ const isMac =
   typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
 
 const DEMO_NOTICE =
-  "Örnek veri • Gerçek sisteme bağlı değil • Değişiklikler bu oturumla sınırlıdır"
+  "Yerel önizleme • Sunucuya bağlı değil • Panel boş başlar • Yenilemede girilen kayıtlar silinir"
 
 interface TopbarProps {
   onMenuClick?: () => void
@@ -67,7 +67,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             tone={isDemoMode ? "warning" : appEnv === "production" ? "success" : "warning"}
           >
             <span className="size-1.5 rounded-full bg-current" />
-            {isDemoMode ? "Örnek veri" : appEnv === "production" ? "Canlı" : "Test ortamı"}
+            {isDemoMode ? "Yerel önizleme" : appEnv === "production" ? "Canlı" : "Test ortamı"}
           </Badge>
           <IconButton className="lg:hidden" label="Ara" onClick={() => setIsPaletteOpen(true)}>
             <Search size={18} />

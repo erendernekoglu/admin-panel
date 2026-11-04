@@ -24,52 +24,55 @@ async function loadApiClient() {
   return client.namespace;
 }
 
-test("demo fixtures are synthetic, valid and keep canonical media ownership", async () => {
-  const { demo, validation, media } = await loadDemoGraph();
-  const looks = demo.demoLooks();
-  assert.equal(looks.length, 6);
-  assert.equal(demo.demoCollections().length, 3);
-
-  for (const look of looks) {
-    assert.match(look.id, /^[A-Za-z0-9_-]{1,128}$/);
-    assert.match(look.code, /^LB-\d{4}$/);
-    assert.ok(look.media.length >= 1);
-    for (const item of look.media) {
-      assert.match(item.url, /^\/api\/look-media\//);
-      assert.match(item.storagePath, new RegExp(`^editorialMedia/${look.id}/assets/[A-Za-z0-9_-]+\\.jpg$`));
-    }
-    const content = {
-      title: look.title,
-      kind: look.kind,
-      media: look.media,
-      caption: look.caption,
-      tags: look.tags,
-      ...(look.parts !== undefined ? { parts: look.parts } : {}),
-      ...(look.occasionIds !== undefined ? { occasionIds: look.occasionIds } : {}),
-      ...(look.styleNote !== undefined ? { styleNote: look.styleNote } : {}),
-      ...(look.relatedLooks !== undefined ? { relatedLooks: look.relatedLooks } : {}),
-    };
-    const validated = validation.validateLookContent(content);
-    media.validateMediaOwnership(validated, look.id);
-  }
-});
-
-test("demo session uses the shared demo identity and mutations stay isolated", async () => {
+test("demo store starts with empty look and collection lists", async () => {
   const { demo } = await loadDemoGraph();
   const store = demo.createLookbookDemoStore();
-  assert.equal(demo.DEMO_UID, "demo-user-01");
-  assert.equal(store.getSession().uid, "demo-user-01");
-  assert.equal(store.openSession().uid, "demo-user-01");
+
+  assert.deepEqual(store.listLooks(), { items: [], nextCursor: null });
+  assert.deepEqual(store.listCollections(), { items: [], nextCursor: null });
+  assert.throws(() => store.getLook("look_linen_layers"));
+});
+
+test("test fixtures are created through operations and keep canonical media ownership", async () => {
+  const { demo, validation, media } = await loadDemoGraph();
+  const store = demo.createLookbookDemoStore();
+
+  const prepared = store.prepareLook("fixture-key");
+  const upload = store.upload(prepared.lookId, { role: "look", width: 900, height: 1200 });
+  const content = {
+    title: "Synthetic test look",
+    kind: "photo",
+    caption: "Created by the test itself.",
+    tags: ["test"],
+    media: [upload.media],
+  };
+  const created = store.createLook({ idempotencyKey: "fixture-key", content });
+  const look = store.getLook(created.lookId);
+
+  assert.match(look.id, /^[A-Za-z0-9_-]{1,128}$/);
+  assert.match(look.code, /^LB-\d{4}$/);
+  assert.equal(validation.validateLookContent(content).title, "Synthetic test look");
+  media.validateMediaOwnership(content, look.id);
+  assert.equal(store.listLooks().items.length, 1);
+});
+
+test("demo session uses the shared local preview identity and mutations stay isolated", async () => {
+  const { demo } = await loadDemoGraph();
+  const store = demo.createLookbookDemoStore();
+  assert.equal(demo.DEMO_UID, "preview-admin");
+  assert.equal(store.getSession().uid, "preview-admin");
+  assert.equal(store.openSession().uid, "preview-admin");
 
   const other = demo.createLookbookDemoStore();
+  assert.equal(other.listLooks().items.length, 0);
   const created = store.createLook({
     idempotencyKey: "create-1",
-    content: { title: "Synthetic draft", kind: "photo", caption: "", tags: [], media: demo.demoLooks()[0].media.slice(0, 1) },
+    content: { title: "Synthetic draft", kind: "photo", caption: "", tags: [], media: [] },
   });
   assert.equal(store.getLook(created.lookId).title, "Synthetic draft");
   assert.throws(() => other.getLook(created.lookId));
-  assert.equal(store.listLooks().items.length, 7);
-  assert.equal(other.listLooks().items.length, 6);
+  assert.equal(store.listLooks().items.length, 1);
+  assert.equal(other.listLooks().items.length, 0);
 });
 
 test("prepare -> upload -> create applies the submitted draft and reveals it", async () => {
@@ -119,13 +122,17 @@ test("prepare -> upload -> create applies the submitted draft and reveals it", a
 test("stale revisions raise a concurrency conflict the UI can act on", async () => {
   const { demo, contract } = await loadDemoGraph();
   const store = demo.createLookbookDemoStore();
-  const look = store.getLook("look_linen_layers");
+  const created = store.createLook({
+    idempotencyKey: "stale-revision",
+    content: { title: "Original title", kind: "photo", caption: "", tags: [], media: [] },
+  });
+  const look = store.getLook(created.lookId);
 
   assert.throws(
     () => store.updateLook(look.id, { expectedRevision: look.revision - 1, content: { ...look, title: "Stale" } }),
     (error) => error.status === 409 && error.field === "revision" && contract.isConcurrencyConflict(error),
   );
-  assert.equal(store.getLook(look.id).title, "Linen Layers for Late Summer");
+  assert.equal(store.getLook(look.id).title, "Original title");
 
   const updated = store.updateLook(look.id, { expectedRevision: look.revision, content: { ...look, title: "Fresh" } });
   assert.equal(updated.look.revision, look.revision + 1);
@@ -160,7 +167,7 @@ test("legacy adminFetch stays same-origin and uses no network in demo mode", asy
   };
   try {
     const page = await client.adminFetch("/api/admin/looks");
-    assert.equal(page.items.length, 6);
+    assert.equal(page.items.length, 0);
     assert.equal(page.nextCursor, null);
 
     const created = await client.adminFetch("/api/admin/looks", {
@@ -174,7 +181,7 @@ test("legacy adminFetch stays same-origin and uses no network in demo mode", asy
     assert.equal(loaded.look.title, "Legacy adapter");
 
     const session = await client.adminFetch("/api/admin/session");
-    assert.equal(session.uid, "demo-user-01");
+    assert.equal(session.uid, "preview-admin");
 
     await assert.rejects(
       client.adminFetch("https://attacker.example/api/admin/session"),

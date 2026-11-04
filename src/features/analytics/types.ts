@@ -161,7 +161,7 @@ export interface RecentActivationFilters {
 }
 
 export interface RecentActivationResponse {
-  dataThrough: string
+  dataThrough: string | null
   journeys: ActivationJourney[]
 }
 

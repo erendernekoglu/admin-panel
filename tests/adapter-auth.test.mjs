@@ -266,7 +266,7 @@ test("client: plain JSON result is returned without an envelope", async () => {
   }
 })
 
-test("auth demo: signed out on load, synthetic admin entry, and zero network calls", async () => {
+test("auth demo: signed out on load, local preview entry, and zero network calls", async () => {
   const auth = await loadModule("src/features/auth/authService.ts", configMock(true))
   const fetchState = captureFetch(() => {
     throw new Error("fetch must not run in demo mode")
@@ -275,8 +275,10 @@ test("auth demo: signed out on load, synthetic admin entry, and zero network cal
   try {
     assert.equal(await auth.fetchSession(), null)
     const session = auth.createDemoSession()
-    assert.equal(session.user.uid, "demo-user-01")
-    assert.equal(session.adminProfile.uid, "demo-user-01")
+    assert.equal(session.user.uid, "preview-admin")
+    assert.equal(session.user.email, null)
+    assert.equal(session.user.displayName, "Yerel önizleme")
+    assert.equal(session.adminProfile.uid, "preview-admin")
     assert.equal(session.adminProfile.consoleRole, "admin")
     await assert.rejects(auth.loginWithEmail("a@b.dev", "secret"), /demo mode/i)
     await auth.logout()
@@ -456,6 +458,51 @@ test("auth provider: login during a delayed startup session releases loading and
   ;({ value } = render())
   assert.equal(value.user.uid, "new-user")
   assert.equal(value.loading, false)
+})
+
+test("boutique demo: no seeded boutiques or applications and zero network calls", async () => {
+  const mocks = new Map([
+    ["@tanstack/react-query", { queryOptions: (options) => options }],
+  ])
+  const boutique = await loadModule("src/lib/api/boutique.ts", mocks)
+  const fetchState = captureFetch(() => {
+    throw new Error("fetch must not run in demo mode")
+  })
+
+  try {
+    assert.deepEqual(await boutique.boutiqueRequest("/boutiques"), [])
+    assert.deepEqual(await boutique.boutiqueRequest("/applications"), [])
+    assert.deepEqual(boutique.boutiquesQueryOptions.queryKey, ["boutique", "boutiques"])
+    await assert.rejects(
+      boutique.boutiqueRequest("/boutiques/b-missing"),
+      /was not found/,
+    )
+    assert.equal(fetchState.calls.length, 0)
+  } finally {
+    fetchState.restore()
+  }
+})
+
+test("style event demo: no seeded events, entries or winners", async () => {
+  const service = await loadModule("src/features/style-events/styleEventService.ts")
+  assert.deepEqual(await service.listEvents(), { items: [], cursor: null })
+
+  const saved = await service.saveEvent({
+    id: "",
+    title: "Test event",
+    description: "Created by the test itself.",
+    rules: "",
+    coverUrl: "",
+    startsAt: 1,
+    endsAt: 2,
+    status: "draft",
+    prize: { kind: "digital", title: "", description: "", imageUrl: "", aura: 0 },
+  })
+  assert.match(saved.id, /^evt-/)
+  assert.equal((await service.listEvents()).items.length, 1)
+  assert.deepEqual(await service.listEntries(saved.id), { items: [], cursor: null })
+  assert.deepEqual(await service.getWinner(saved.id), { uid: null })
+  await assert.rejects(service.getWinner("evt-missing"), /was not found/)
 })
 
 test("session cache: identity change cancels/clears and stale responses never apply", async () => {

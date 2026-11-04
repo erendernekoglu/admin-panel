@@ -14,12 +14,13 @@ import {
 } from "./contract";
 
 /**
- * In-memory demo data for the Lookbook screen.
+ * In-memory local preview for the Lookbook screen.
  *
- * Everything here is fictional and synthetic: no customer content, no real
- * media and no production identifiers. The store is created once per module
- * load, so a page reload returns to the seed state. It never performs network
- * I/O; the shared `adminRequest` adapter only invokes it in demo mode.
+ * The store starts empty: no looks, no collections and no synthetic editorial
+ * records. Records exist only after the user creates them, and the store is
+ * created once per module load, so a page reload returns to the empty state.
+ * It never performs network I/O; the shared `adminRequest` adapter only invokes
+ * it in demo mode.
  */
 
 export interface LookbookDemoSession {
@@ -28,8 +29,8 @@ export interface LookbookDemoSession {
 }
 
 const PAGE_SIZE = 20;
-/** Must match the shared demo identity used by the auth provider. */
-export const DEMO_UID = "demo-user-01";
+/** Must match the shared local preview identity used by the auth provider. */
+export const DEMO_UID = "preview-admin";
 
 const clone = <T>(value: T): T => structuredClone(value);
 const now = () => new Date().toISOString();
@@ -72,247 +73,6 @@ function notFound(): AdminClientError {
   return new AdminClientError(404, "Kayıt bulunamadı. Silinmiş olabilir; listeyi yeniden yükleyin.");
 }
 
-export function demoLooks(): LookDto[] {
-  return [
-    {
-      id: "look_linen_layers",
-      code: "LB-1042",
-      revision: 4,
-      createdAt: "2026-09-02T08:15:00.000Z",
-      updatedAt: "2026-10-21T16:40:00.000Z",
-      webPublication: {
-        status: "published",
-        revisionId: "look_linen_layers_r4",
-        publishedAt: "2026-10-21T16:42:00.000Z",
-      },
-      appPublication: {
-        status: "published",
-        revisionId: "look_linen_layers_r4",
-        feedPostRef: "feed_linen_layers",
-        publishedAt: "2026-10-21T16:45:00.000Z",
-      },
-      appFeedStatus: "published",
-      title: "Linen Layers for Late Summer",
-      kind: "lookbook",
-      caption: "Two breathable layers in one quiet palette, styled for a slow afternoon by the water.",
-      tags: ["linen", "summer", "minimal"],
-      media: [
-        media("look_linen_layers", "asset_linen_1", 1200, 1600),
-        media("look_linen_layers", "asset_linen_2", 1200, 1600),
-      ],
-      parts: [
-        {
-          hidden: false,
-          name: "Relaxed linen shirt",
-          imageUrl: "/api/look-media/look_linen_layers/asset_linen_1",
-          storagePath: "editorialMedia/look_linen_layers/assets/asset_linen_1.jpg",
-          garmentId: "garment_linen_shirt",
-          shoppingLinks: [
-            {
-              id: "link_linen_shirt",
-              url: "https://northwind-atelier.example/products/relaxed-linen-shirt",
-              retailer: "Northwind Atelier",
-              label: "Relaxed linen shirt",
-              relation: "exact",
-            },
-          ],
-        },
-        {
-          hidden: false,
-          name: "Wide-leg trousers",
-          imageUrl: "/api/look-media/look_linen_layers/asset_linen_2",
-          storagePath: "editorialMedia/look_linen_layers/assets/asset_linen_2.jpg",
-          shoppingLinks: [
-            {
-              id: "link_linen_trousers",
-              url: "https://harbor-lane.example/products/wide-leg-trousers",
-              retailer: "Harbor Lane",
-              relation: "similar",
-            },
-          ],
-        },
-      ],
-      occasionIds: ["casual", "travel"],
-      styleNote: "Keep the shirt open over a tonal tank and let the trousers break once at the ankle.",
-      relatedLooks: [{ lookId: "look_weekend_denim", label: "Weekend denim" }],
-    },
-    {
-      id: "look_monochrome_office",
-      code: "LB-1043",
-      revision: 2,
-      createdAt: "2026-09-14T10:05:00.000Z",
-      updatedAt: "2026-10-19T11:20:00.000Z",
-      webPublication: {
-        status: "published",
-        revisionId: "look_monochrome_office_r2",
-        publishedAt: "2026-10-19T11:22:00.000Z",
-      },
-      appPublication: { status: "not_published" },
-      title: "Monochrome Office Uniform",
-      kind: "photo",
-      caption: "One colour, three textures. A desk-to-dinner uniform that never needs a second thought.",
-      tags: ["office", "monochrome", "tailoring"],
-      media: [media("look_monochrome_office", "asset_mono_1", 1200, 1600)],
-      parts: [
-        {
-          hidden: false,
-          name: "Cropped wool blazer",
-          imageUrl: "/api/look-media/look_monochrome_office/asset_mono_1",
-          storagePath: "editorialMedia/look_monochrome_office/assets/asset_mono_1.jpg",
-          shoppingLinks: [
-            {
-              id: "link_mono_blazer",
-              url: "https://atelier-northwind.example/products/cropped-wool-blazer",
-              retailer: "Atelier Northwind",
-              relation: "similar",
-            },
-          ],
-        },
-        { hidden: true },
-      ],
-      occasionIds: ["work", "formal"],
-      styleNote: "Matte wool against a fine knit keeps the single colour from reading flat.",
-    },
-    {
-      id: "look_weekend_denim",
-      code: "LB-1044",
-      revision: 1,
-      createdAt: "2026-10-02T09:30:00.000Z",
-      updatedAt: "2026-10-16T14:10:00.000Z",
-      webPublication: { status: "draft" },
-      appPublication: { status: "not_published" },
-      title: "Weekend Denim, Softened",
-      kind: "lookbook",
-      caption: "Rigid denim balanced with a brushed overshirt and worn-in sneakers.",
-      tags: ["denim", "weekend"],
-      media: [
-        media("look_weekend_denim", "asset_denim_1", 1200, 1600),
-        media("look_weekend_denim", "asset_denim_2", 1200, 1600, "try_on"),
-      ],
-      parts: [
-        {
-          hidden: false,
-          name: "Brushed overshirt",
-          imageUrl: "/api/look-media/look_weekend_denim/asset_denim_1",
-          storagePath: "editorialMedia/look_weekend_denim/assets/asset_denim_1.jpg",
-        },
-      ],
-      occasionIds: ["casual", "brunch"],
-    },
-    {
-      id: "look_city_rain",
-      code: "LB-1045",
-      revision: 3,
-      createdAt: "2026-08-21T07:40:00.000Z",
-      updatedAt: "2026-10-12T18:05:00.000Z",
-      webPublication: {
-        status: "published",
-        revisionId: "look_city_rain_r3",
-        publishedAt: "2026-10-12T18:06:00.000Z",
-      },
-      appPublication: { status: "withdrawn", revisionId: "look_city_rain_r2", feedPostRef: "feed_city_rain", publishedAt: "2026-10-01T08:00:00.000Z", withdrawnAt: "2026-10-10T09:15:00.000Z" },
-      appFeedStatus: "missing",
-      title: "City Rain, Handled",
-      kind: "photo",
-      caption: "A compact rain layer over wide trousers, built for a commute that will not stay dry.",
-      tags: ["rain", "commute", "outerwear"],
-      media: [media("look_city_rain", "asset_rain_1", 1200, 1600)],
-      occasionIds: ["casual", "work"],
-      styleNote: "Cropped outer layers keep the hem clear of puddles without shortening the silhouette.",
-    },
-    {
-      id: "look_archive_tailoring",
-      code: "LB-0988",
-      revision: 6,
-      createdAt: "2026-05-04T12:00:00.000Z",
-      updatedAt: "2026-09-28T08:45:00.000Z",
-      webPublication: {
-        status: "archived",
-        revisionId: "look_archive_tailoring_r5",
-        publishedAt: "2026-07-11T10:00:00.000Z",
-        archivedAt: "2026-09-28T08:45:00.000Z",
-      },
-      title: "Winter Tailoring, Archived",
-      kind: "photo",
-      caption: "A retired winter story kept for reference; the pieces return in the next capsule.",
-      tags: ["winter", "tailoring"],
-      media: [media("look_archive_tailoring", "asset_archive_1", 1200, 1600)],
-      occasionIds: ["formal", "wedding"],
-    },
-    {
-      id: "look_knitwear_study",
-      code: "LB-1046",
-      revision: 1,
-      createdAt: "2026-10-20T15:25:00.000Z",
-      updatedAt: "2026-10-22T07:35:00.000Z",
-      webPublication: { status: "draft" },
-      appPublication: { status: "not_published" },
-      title: "Knitwear Proportion Study",
-      kind: "lookbook",
-      caption: "An open draft comparing a cropped knit with a longer ribbed hem.",
-      tags: ["knitwear", "study"],
-      media: [
-        media("look_knitwear_study", "asset_knit_1", 1200, 1600),
-        media("look_knitwear_study", "asset_knit_2", 1200, 1600, "try_on"),
-      ],
-      parts: [{ hidden: true }],
-      occasionIds: ["home", "casual"],
-    },
-  ];
-}
-
-export function demoCollections(): CollectionDto[] {
-  return [
-    {
-      id: "col_quiet_layers",
-      revision: 3,
-      createdAt: "2026-09-08T09:00:00.000Z",
-      updatedAt: "2026-10-20T12:15:00.000Z",
-      webPublication: {
-        status: "published",
-        revisionId: "col_quiet_layers_r3",
-        publishedAt: "2026-10-20T12:18:00.000Z",
-      },
-      title: "Quiet Layers",
-      slug: "quiet-layers",
-      description: "Soft tailoring and breathable layers for the weeks between seasons.",
-      lookIds: ["look_linen_layers", "look_monochrome_office", "look_weekend_denim"],
-    },
-    {
-      id: "col_office_edit",
-      revision: 1,
-      createdAt: "2026-10-06T08:10:00.000Z",
-      updatedAt: "2026-10-17T09:05:00.000Z",
-      webPublication: { status: "draft" },
-      title: "The Office Edit",
-      slug: "office-edit",
-      description: "Workwear pieces that move from desk to dinner without a change.",
-      lookIds: ["look_monochrome_office"],
-    },
-    {
-      id: "col_archive_2025",
-      revision: 5,
-      createdAt: "2025-11-02T10:00:00.000Z",
-      updatedAt: "2026-09-30T16:30:00.000Z",
-      webPublication: {
-        status: "archived",
-        revisionId: "col_archive_2025_r4",
-        publishedAt: "2026-01-15T10:00:00.000Z",
-        archivedAt: "2026-09-30T16:30:00.000Z",
-      },
-      title: "Archive: Winter 2025",
-      slug: "archive-winter-2025",
-      description: "Previous season reference collection.",
-      lookIds: ["look_archive_tailoring"],
-    },
-  ];
-}
-
-export interface LookbookDemoSeed {
-  looks?: LookDto[];
-  collections?: CollectionDto[];
-}
-
 export interface LookbookDemoStore {
   getSession(): LookbookDemoSession;
   openSession(): LookbookDemoSession;
@@ -334,10 +94,10 @@ export interface LookbookDemoStore {
   archiveCollection(id: string, input: { expectedRevision: number; idempotencyKey: string }): { collection: CollectionDto };
 }
 
-/** Create an isolated store; tests use one per case so mutations cannot leak. */
-export function createLookbookDemoStore(seed: LookbookDemoSeed = {}): LookbookDemoStore {
-  let looks = clone(seed.looks ?? demoLooks());
-  let collections = clone(seed.collections ?? demoCollections());
+/** Create an isolated, empty store; tests use one per case so mutations cannot leak. */
+export function createLookbookDemoStore(): LookbookDemoStore {
+  let looks: LookDto[] = [];
+  let collections: CollectionDto[] = [];
   const prepared = new Set<string>();
   const createdLooks = new Map<string, string>();
   const createdCollections = new Map<string, string>();

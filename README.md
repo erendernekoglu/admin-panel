@@ -10,25 +10,37 @@ Depoda gerçek bir backend, üretim anahtarı veya canlı servis entegrasyonu yo
 
 | Değer | Davranış |
 | --- | --- |
-| `demo` (varsayılan) | Tüm ekranlar sentetik, yalnızca bellekte tutulan veriyle çalışır. Hiçbir ağ isteği gönderilmez. |
+| `demo` (varsayılan) | Boş, yalnızca bellekte tutulan yerel önizleme. Tüm ekranlar kayıtsız başlar; girilen kayıtlar sayfa yenilenince silinir ve hiçbir ağ isteği gönderilmez. |
 | `api` | Aynı kaynaklı `/api/admin/operations/*` adaptörü kullanılır. |
 
 Değişken boş veya tanımsızsa `demo` kullanılır. `demo` ya da `api` dışındaki
 her değer yapılandırma hatasıdır ve uygulama başlamaz; yazım hatası sessizce
 demo moduna düşmez. `VITE_APP_ENV` yalnızca üst çubuktaki ortam etiketini
-belirler (`staging` veya `production`).
+belirler (`staging` veya `production`). `VITE_PUBLIC_SITE_URL` isteğe bağlıdır;
+tanımlanmazsa Lookbook ekranındaki genel canlı site bağlantısı "yapılandırılmadı"
+olarak görünür ve arka uçta canlı bir site olduğu varsayılmaz.
 
-Demo modunda oturum başlangıçta yoktur. Giriş ekranındaki **Örnek veriyle gir**
-düğmesi sabit bir örnek yönetici oturumu açar. Bu oturum gerçek kimlik doğrulama
-değildir, hiçbir istek göndermez ve sayfa yenilenince kaybolur. Panelin üst
+Demo modunda oturum başlangıçta yoktur ve hiçbir örnek kayıt yüklenmez.
+Giriş ekranındaki **Boş paneli aç** düğmesi sabit bir yerel yönetici oturumu
+açar. Bu oturum gerçek kimlik doğrulama değildir, arka uçta bir kayıt
+oluşturmaz, hiçbir istek göndermez ve sayfa yenilenince kaybolur. Panelin üst
 çubuğunda şu uyarı sürekli görünür:
 
-> Örnek veri • Gerçek sisteme bağlı değil • Değişiklikler bu oturumla sınırlıdır
+> Yerel önizleme • Sunucuya bağlı değil • Panel boş başlar • Yenilemede girilen kayıtlar silinir
+
+Yerel önizlemede lookbook, butikler, stil etkinlikleri ve diğer ekranlar boş
+listelerle açılır. Kayıtlar yalnızca kullanıcı oluşturma/düzenleme işlemleriyle
+eklenir; bunlar bellekte tutulur, sayfa yenilenince temizlenir ve hiçbir
+zaman bir API hatasından sonra örnek veriye düşülmez.
 
 API modunda demo oturumu kabul edilmez; kullanıcı ve rol bilgisi yalnızca
 sunucunun doğrulanmış yanıtından okunur.
 
 ## API sözleşmesi
+
+API modu, mevcut aynı kaynaklı işlem sözleşmesini kullanır. Bu depo bir arka
+uç içermez; sözleşme gelecekte eklenecek kayıtlar ve butik/stil etkinliği
+işlemleri için korunur. Yerel önizleme modunda bu uçlara istek gönderilmez.
 
 Her işlem aynı kaynakta şu adrese `POST` edilir:
 
@@ -42,7 +54,7 @@ Her işlem aynı kaynakta şu adrese `POST` edilir:
 - Varsayılan zaman aşımı 60 saniyedir.
 - Başarılı yanıt gövdesi **düz JSON** sonuçtur; `{ "data": ... }` zarfı yoktur.
 - Boş gövde, geçersiz JSON, 2xx dışı durum, ağ hatası veya zaman aşımı hata
-  olarak döner. API hatasından sonra **asla** demo verisine düşülmez.
+  olarak döner. API hatasından sonra **asla** yerel önizleme verisine düşülmez.
 - İşlem adı `/^[A-Za-z][A-Za-z0-9._-]*$/` ile sınırlıdır; yol geçişi reddedilir.
 - Hata gövdesi güvenli biçimde okunur: `{ "error": { "code", "field", "message" } }`
   veya üst düzey `code`/`field`/`message`. Rastgele alanlar istemciye taşınmaz.
@@ -94,8 +106,8 @@ npm test
 
 Demo modunda hiçbir harici veri servisine istek gönderilmez. Yalnızca aynı
 kaynaklı statik varlıklar ve fontlar normal sayfa yüklemesi sırasında yüklenir.
-Sentetik fixture'lar yalnızca bellekte tutulur; tarayıcı yenilendiğinde tüm
-örnek değişiklikler sıfırlanır.
+Yerel önizleme verisi yalnızca bellekte tutulur; tarayıcı yenilendiğinde girilen
+tüm kayıtlar silinir ve panel tekrar boş başlar.
 
 ## Kapsam dışı
 

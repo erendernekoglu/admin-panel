@@ -54,8 +54,8 @@ export type {
  *
  * Live mode: the shared `adminRequest` adapter POSTs JSON to the same-origin
  * `/api/admin/operations/<operation>` endpoint with the admin session cookie.
- * Demo mode: `adminRequest` invokes the local callback below instead, so this
- * feature never talks to a vendor SDK or a production host.
+ * Demo mode: `adminRequest` invokes the empty local preview store instead, so
+ * this feature never talks to a vendor SDK or a production host.
  */
 export const LOOKBOOK_OPERATIONS = {
   sessionRead: "lookbook.session.read",
@@ -87,7 +87,7 @@ export interface LookbookSession {
 export type LookbookContent = EditorialLookContent | LookCollectionContent;
 type RevisionedContent = LookbookContent & AdminRecordDto;
 
-/** One module-level store: demo edits persist until the page reloads, then reset. */
+/** One module-level store: local preview edits persist until the page reloads, then reset. */
 const demoStore = createLookbookDemoStore();
 
 function mapRequestError(error: AdminRequestError): AdminClientError {
@@ -129,7 +129,7 @@ export function getLookbookSession(): Promise<LookbookSession> {
 /**
  * Ask the admin API to (re)open the editor session. The API owns credential
  * verification; the browser never mints a session itself. In demo mode the
- * local store returns its synthetic editor.
+ * empty local preview store returns its fixed local editor identity.
  */
 export function openLookbookSession(credentials: { password?: string } = {}): Promise<LookbookSession> {
   return request<LookbookSession>(

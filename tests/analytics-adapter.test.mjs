@@ -35,15 +35,13 @@ function createDemoStore() {
         anonymousUsers: 0,
         users: [],
       }),
-      demoMarketSnapshots: (startDate, endDate) => [
-        { id: "demo-1", startDate, endDate },
-      ],
+      demoMarketSnapshots: () => [],
       demoUpsertMarketSnapshot: (snapshot) => {
         snapshots.push(snapshot)
         return { id: "demo-created" }
       },
       demoCollectionCounts: (names) =>
-        Object.fromEntries(names.map((name) => [name, 2])),
+        Object.fromEntries(names.map((name) => [name, 0])),
       demoOperationalData: () => ({
         creditTransactions: [],
         wardrobe: [],
@@ -52,9 +50,7 @@ function createDemoStore() {
         wishlist: [],
         calendar: [],
       }),
-      demoWardrobeItems: (limit) => [
-        { id: "demo-item", userId: "demo-user", category: "Tops", createdAt: 1, limit },
-      ],
+      demoWardrobeItems: () => [],
       demoGooglePlay: (startDate, endDate) => ({
         daily: [],
         totals: {
@@ -83,18 +79,15 @@ function createDemoStore() {
         countries: [],
         integration: { dataThrough: endDate, status: "demo", startDate },
       }),
-      demoCountUsers: () => 3,
+      demoCountUsers: () => 0,
       demoPlanCounts: () => ({
-        total: 3,
-        free: 1,
-        pro: 1,
-        premium: 1,
+        total: 0,
+        free: 0,
+        pro: 0,
+        premium: 0,
         unassigned: 0,
       }),
-      demoUsersCreatedBetween: () => [
-        { uid: "demo-new-1", createdAt: "2026-08-10T09:00:00.000Z" },
-        { uid: "demo-new-2", createdAt: "2026-08-11T09:00:00.000Z" },
-      ],
+      demoUsersCreatedBetween: () => [],
     },
   }
 }
@@ -377,7 +370,7 @@ test("dashboard: aggregate user stats use one operation and honor role access", 
   assert.equal(stats.userTrendData.at(-1)?.count ?? 0, 0)
 })
 
-test("dashboard: demo user stats come from the shared synthetic store", async () => {
+test("dashboard: demo user stats come from the shared empty store", async () => {
   const emptyAnalytics = {
     creditTransactions: [],
     wardrobeItems: [],
@@ -420,9 +413,17 @@ test("dashboard: demo user stats come from the shared synthetic store", async ()
   })
 
   assert.equal(network.length, 0)
-  assert.equal(stats.metrics.totalUsers, 3)
-  assert.equal(stats.metrics.newUsers, 2)
+  assert.equal(stats.metrics.totalUsers, 0)
+  assert.equal(stats.metrics.newUsers, 0)
+  assert.equal(stats.metrics.activeUsers, 0)
+  assert.equal(stats.metrics.creditSpend, 0)
+  assert.equal(stats.metrics.creditLoad, 0)
   assert.equal(stats.metrics.activeSubscriptions, null)
+  assert.equal(stats.metrics.totalBlogPosts, 0)
+  assert.equal(stats.metrics.totalWardrobeItems, 0)
+  assert.equal(stats.metrics.estimatedCac, null)
   assert.equal(stats.subscriptionDistribution, null)
   assert.deepEqual(stats.newUserProfiles, [])
+  assert.deepEqual(stats.recentActivities, [])
+  assert.deepEqual(stats.creditOperationData, [])
 })

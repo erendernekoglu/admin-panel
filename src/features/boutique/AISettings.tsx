@@ -5,8 +5,7 @@ import { Badge } from '../../components/atoms/Badge/Badge';
 import { Button } from '../../components/atoms/Button';
 const serviceNames = {virtualTryOn:'Sanal deneme', garmentAutofill:'Otomatik kıyafet doldurma',lookEngine:'Look Engine ile kombin oluşturma',backgroundRemoval:'Arka plan kaldırma'} as const;
 type Service = keyof typeof serviceNames;
-const tryOnDefaults = {model:'demo-tryon/standard',loraScale:1,seed:-1,additionalPrompt:''};
-const demoProviders:Record<Service,string> = {virtualTryOn:'demo-tryon',garmentAutofill:'demo-taxonomy',lookEngine:'demo-look',backgroundRemoval:'demo-cutout'};
+const tryOnDefaults = {model:'',loraScale:1,seed:-1,additionalPrompt:''};
 type Settings = {revision:number; services:Record<Service,{enabled:boolean;provider:string;hasApiKey:boolean;endpoint?:string;model?:string;loraScale?:number;seed?:number;additionalPrompt?:string}>};
 export function AISettings({id}:{id:string}) {
   const queryClient=useQueryClient();
@@ -18,7 +17,7 @@ export function AISettings({id}:{id:string}) {
   return <><AISettingsForm key={`${id}-${query.data.revision}`} data={query.data} id={id} onSaved={data=>{queryClient.setQueryData(queryKey,data);setSaved(true);}} onEdit={()=>setSaved(false)}/>{saved&&<p role="status" className="mt-3 animate-pop-in rounded-xl bg-success-soft p-3 text-sm font-semibold text-success">Ayarlar kaydedildi.</p>}</>;
 }
 function AISettingsForm({id,data,onSaved,onEdit}:{id:string;data:Settings;onSaved:(data:Settings)=>void;onEdit:()=>void}) {
-  const [services,setServices]=useState(()=>Object.fromEntries((Object.keys(serviceNames) as Service[]).map(name=>[name,{...(name==='virtualTryOn'?tryOnDefaults:{}),...(data.services[name]||{enabled:false,hasApiKey:false,provider:''}),provider:demoProviders[name],endpoint:'',apiKey:'',clearApiKey:false}])) as Record<Service,Settings['services'][Service]&{apiKey:string;clearApiKey:boolean}>);
+  const [services,setServices]=useState(()=>Object.fromEntries((Object.keys(serviceNames) as Service[]).map(name=>[name,{...(name==='virtualTryOn'?tryOnDefaults:{}),...(data.services[name]||{enabled:false,hasApiKey:false,provider:''}),endpoint:'',apiKey:'',clearApiKey:false}])) as Record<Service,Settings['services'][Service]&{apiKey:string;clearApiKey:boolean}>);
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   const [editingKeys,setEditingKeys]=useState<Partial<Record<Service,boolean>>>({});
   const changed=(name:Service)=>services[name].enabled!==(data.services[name]?.enabled||false)||!!services[name].apiKey.trim()||services[name].clearApiKey||(name==='virtualTryOn'&&(Object.keys(tryOnDefaults) as (keyof typeof tryOnDefaults)[]).some(key=>services[name][key] !== (data.services[name]?.[key] ?? tryOnDefaults[key])));
@@ -38,18 +37,14 @@ function AISettingsForm({id,data,onSaved,onEdit}:{id:string;data:Settings;onSave
         {changed(name)&&<span className="text-sm text-muted">Değişikliği uygulamak için ayarları kaydedin.</span>}
       </div>
       <label className="flex items-center gap-2 text-sm font-semibold text-ink"><input type="checkbox" checked={value.enabled} onChange={e=>update(name,{enabled:e.target.checked})}/>{serviceNames[name]} özelliğini aç</label>
-      {name==='virtualTryOn' ? <div className="space-y-2 rounded-xl bg-surface-2 p-4 text-sm text-ink-soft"><p className="font-bold text-ink">Demo deneme servisi</p><label className="block font-semibold text-ink">Sanal deneme modeli<select className={input} value={value.model} onChange={e=>update(name,{model:e.target.value})}>
-        <option value="demo-tryon/standard">Demo Standart</option>
-        <option value="demo-tryon/quality">Demo Kalite</option>
-        <option value="demo-tryon/fast">Demo Hızlı (LoRA olmadan)</option>
-      </select></label>
-      <p>Demo modunda model seçimi yalnızca formu dener; hiçbir üretim isteği gönderilmez.</p>
-      {value.model==='demo-tryon/fast'?<p>Hızlı model, sanal denemeyi görseller ve talimatla oluşturur; LoRA ağırlığı bu modelde kullanılmaz.</p>:<><label className="block font-semibold text-ink">Kıyafet uyarlama ağırlığı (LoRA)<input className={input} type="number" min={0} max={2} step={0.1} required value={value.loraScale} onChange={e=>update(name,{loraScale:e.target.valueAsNumber})}/></label>
-      <p>Önerilen değer: 1. Değer 0 olduğunda sanal deneme LoRA etkisi kapatılır.</p></>}
+      {name==='virtualTryOn' ? <div className="space-y-2 rounded-xl bg-surface-2 p-4 text-sm text-ink-soft"><p className="font-bold text-ink">Sanal deneme modeli</p><label className="block font-semibold text-ink">Model kimliği<input className={input} type="text" spellCheck={false} value={value.model} onChange={e=>update(name,{model:e.target.value})} placeholder="Yapılandırılmış API model kimliği"/></label>
+      <p>Sağlayıcı ve model, yapılandırılmış API tarafından belirlenir. Yerel önizleme hiçbir üretim isteği göndermez.</p>
+      <label className="block font-semibold text-ink">Kıyafet uyarlama ağırlığı (LoRA)<input className={input} type="number" min={0} max={2} step={0.1} required value={value.loraScale} onChange={e=>update(name,{loraScale:e.target.valueAsNumber})}/></label>
+      <p>Önerilen değer: 1. Değer 0 olduğunda sanal deneme LoRA etkisi kapatılır.</p>
       <label className="block font-semibold text-ink">Rastgelelik değeri (seed)<input className={input} type="number" min={-1} max={2147483647} step={1} required value={value.seed} onChange={e=>update(name,{seed:e.target.valueAsNumber})}/></label>
       <p>Her denemede farklı sonuç için -1 kullanın. Aynı girdileri karşılaştırmak için sabit bir sayı seçin.</p>
       <label className="block font-semibold text-ink">Ek deneme talimatı<textarea className={input} rows={3} maxLength={1000} value={value.additionalPrompt} onChange={e=>update(name,{additionalPrompt:e.target.value})} placeholder="Örnek: Kıyafetin baskı ve kumaş detaylarını koru."/></label>
-      <p>Ek talimat standart sanal deneme talimatının sonuna eklenir. Boş bırakabilirsiniz.</p><p>En fazla bir üst ve bir alt kıyafet denenir; ayakkabı ve aksesuar desteklenmez. Kaydettiğiniz ayarlar bağlı ekranlarda bir sonraki denemede uygulanır. Model değiştirirken API anahtarını tekrar girmeniz gerekmez.</p></div> : <p className="text-sm text-muted">Demo servis kataloğu üzerinden yönetilir. Kayıtlı anahtar, özelliği açıp kapatırken korunur.</p>}
+      <p>Ek talimat standart sanal deneme talimatının sonuna eklenir. Boş bırakabilirsiniz.</p><p>Kaydettiğiniz ayarlar bağlı ekranlarda bir sonraki denemede uygulanır. Model değiştirirken API anahtarını tekrar girmeniz gerekmez.</p></div> : <p className="text-sm text-muted">Sağlayıcı ve model, yapılandırılmış API tarafından belirlenir. Yerel önizleme hiçbir üretim isteği göndermez. Kayıtlı anahtar, özelliği açıp kapatırken korunur.</p>}
       <p className="text-sm text-muted">{value.clearApiKey?'API anahtarı kaydettiğinizde silinecek.':value.hasApiKey?'API anahtarı kayıtlı. Tekrar girmeniz gerekmez.':'Henüz API anahtarı girilmedi.'}</p>
       {needsNewKey&&value.enabled&&<p className="text-sm text-warning">Servis bağlantısı değiştiği için API anahtarını bir kez yeniden girin.</p>}
       {value.hasApiKey&&!showKey&&!value.clearApiKey&&<button type="button" className="text-sm font-semibold text-accent underline-offset-4 hover:underline" onClick={()=>setEditingKeys(current=>({...current,[name]:true}))}>Anahtarı değiştir</button>}

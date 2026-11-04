@@ -11,16 +11,28 @@ interface AppConfigSummaryProps {
 
 export function AppConfigSummary({ summary }: AppConfigSummaryProps) {
   const services = summary.apiLimits
-    ? Object.entries(summary.apiLimits).map(([key, service]) => ({
-        key,
-        enabled: service.enabled,
-      }))
+    ? Object.entries(summary.apiLimits).flatMap(([key, service]) => {
+        const status = service as { enabled?: unknown } | null
+        return status && typeof status.enabled === "boolean"
+          ? [{ key, enabled: status.enabled }]
+          : []
+      })
     : []
   const enabledServices = services.filter((service) => service.enabled).length
   const totalServices = services.length
   const weatherSlots = summary.weatherTimeSlots
-    ? Object.keys(summary.weatherTimeSlots).length
+    ? Object.values(summary.weatherTimeSlots).filter((slot) => {
+        const value = slot as { start?: unknown; end?: unknown } | null
+        return (
+          value !== null &&
+          typeof value === "object" &&
+          typeof value.start === "number" &&
+          typeof value.end === "number"
+        )
+      }).length
     : 0
+  const appVersion = summary.appVersion?.latestVersion?.trim() ?? ""
+  const dwKvkkVersion = summary.dwKvkkVersion?.currentVersion?.trim() ?? ""
   const hasAnyConfig =
     Boolean(summary.apiLimits) ||
     Boolean(summary.appVersion) ||
@@ -63,18 +75,18 @@ export function AppConfigSummary({ summary }: AppConfigSummaryProps) {
             tone={servicesHealthy ? "success" : "warning"}
           />
           <StatusTile
-            helper={summary.appVersion?.latestVersion ?? "Bilgi yok"}
+            helper={appVersion || "Bilgi yok"}
             icon={Settings2}
             label="Uygulama sürümü"
-            status={summary.appVersion ? "Ayarlı" : "Eksik"}
-            tone={summary.appVersion ? "success" : "danger"}
+            status={appVersion ? "Ayarlı" : "Eksik"}
+            tone={appVersion ? "success" : "danger"}
           />
           <StatusTile
-            helper={summary.dwKvkkVersion?.currentVersion ?? "Bilgi yok"}
+            helper={dwKvkkVersion || "Bilgi yok"}
             icon={ShieldCheck}
             label="KVKK sürümü"
-            status={summary.dwKvkkVersion ? "Ayarlı" : "Eksik"}
-            tone={summary.dwKvkkVersion ? "success" : "danger"}
+            status={dwKvkkVersion ? "Ayarlı" : "Eksik"}
+            tone={dwKvkkVersion ? "success" : "danger"}
           />
           <StatusTile
             helper={weatherSlots ? `${weatherSlots} zaman dilimi tanımlı` : "Bilgi yok"}
