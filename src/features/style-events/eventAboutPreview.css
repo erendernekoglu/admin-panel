@@ -1,0 +1,56 @@
+@font-face { font-family: EventManrope; src: url('/event-preview/Manrope_400Regular.ttf'); font-weight: 400; font-display: swap; }
+@font-face { font-family: EventManrope; src: url('/event-preview/Manrope_700Bold.ttf'); font-weight: 700; font-display: swap; }
+@font-face { font-family: EventManrope; src: url('/event-preview/Manrope_800ExtraBold.ttf'); font-weight: 800; font-display: swap; }
+/*
+  Values mirror the mobile app ui-shared light-theme tokens and the two native preview components.
+  The phone preview is a faithful replica of the app screen, so it deliberately keeps the app palette
+  in both admin themes instead of following the admin tokens. All app colors live here, once.
+*/
+.event-phone {
+  --phone-ink: #2E2218;
+  --phone-ink-soft: #4A3728;
+  --phone-bg: #FAF7F0;
+  --phone-line: #D2C4BB;
+  --phone-aura: #D8A02A;
+  --phone-theme-line: #D2A974;
+  --phone-theme-bg: #F6E8CF;
+  --phone-theme-ink: #392719;
+  --phone-theme-accent: #A96635;
+  --phone-theme-avatar: #FFF7E9;
+  --phone-theme-soft: #6A4530;
+}
+.event-phone-viewport { overflow-x: auto; max-width: 100%; padding: 4px; }
+.event-phone { font-family: EventManrope, sans-serif; font-size: 14px; line-height: 20px; color: var(--phone-ink); background: var(--phone-bg); border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 1px var(--phone-line), var(--shadow); }
+.event-phone p, .event-phone h2, .event-phone h3 { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.event-phone strong { font-weight: 700; }
+.event-phone h2 { font-size: 24px; line-height: 30px; letter-spacing: -.2px; font-weight: 800; }
+.event-phone h3 { font-size: 20px; line-height: 26px; font-weight: 700; }
+.event-phone header { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.event-phone header > .event-phone-icon { margin: 10px; flex-shrink: 0; }
+.event-phone-icon { line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.event-phone-scroll { max-height: 740px; overflow-y: auto; scrollbar-width: none; }
+.event-phone-cover { width: 100%; aspect-ratio: 2; object-fit: cover; }
+.event-phone-content { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 32px; }
+.event-phone-secondary { color: var(--phone-ink-soft); }
+.event-phone-sections { display: flex; flex-direction: column; gap: 32px; margin: 16px 0; }
+.event-phone-sections:empty { display: none; }
+.event-phone section { display: flex; flex-direction: column; gap: 12px; }
+.event-phone-reward { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; background: var(--phone-bg); }
+.event-phone-image { width: 100%; object-fit: contain; border-radius: 12px; }
+.event-phone-badges { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 12px; }
+.event-phone-badges > div { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.event-phone-badge { position: relative; width: 80px; height: calc(80px * 778 / 674); overflow: hidden; }
+.event-phone-badge img { position: absolute; top: 0; width: 240px; max-width: none; height: 100%; }
+.event-phone-custom-badge { width: 100%; aspect-ratio: 1; object-fit: contain; }
+.event-phone-theme { position: relative; isolation: isolate; overflow: hidden; border: 1px solid var(--phone-theme-line); border-radius: 20px; width: 100%; max-width: 360px; align-self: center; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 24px 24px; background: var(--phone-theme-bg); color: var(--phone-theme-ink); }
+.event-phone-theme-art { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.event-phone-avatar { width: 80px; height: 80px; border-radius: 9999px; border: 2px solid var(--phone-theme-accent); background: var(--phone-theme-avatar); display: flex; align-items: center; justify-content: center; }
+.event-phone-handle { font-size: 13px; line-height: 19px; color: var(--phone-theme-soft); }
+.event-phone-progress, .event-phone-stats { width: 100%; display: flex; }
+.event-phone-progress { margin-top: 24px; padding: 12px 0; }
+.event-phone-stats { padding: 16px 0; }
+.event-phone-progress > div, .event-phone-stats > div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.event-phone-progress .event-phone-icon { color: var(--phone-theme-accent); }
+.event-phone-stats span { font-weight: 700; color: var(--phone-theme-soft); }
+.event-phone h3.event-phone-subheading { margin-top: 16px; }
+.event-phone-aura { color: var(--phone-aura); }

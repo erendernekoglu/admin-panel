@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" role="img" aria-label="Soyut profil arka planı">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#f6e8cf"/>
+      <stop offset="0.55" stop-color="#efd7b4"/>
+      <stop offset="1" stop-color="#e3bf95"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="360" height="640" fill="url(#sky)"/>
+  <circle cx="292" cy="96" r="120" fill="url(#glow)"/>
+  <circle cx="60" cy="150" r="46" fill="#d2a974" opacity="0.35"/>
+  <circle cx="84" cy="120" r="20" fill="#a96635" opacity="0.25"/>
+  <path d="M0 470 C 70 420, 130 510, 200 460 C 270 410, 320 480, 360 445 L360 640 L0 640 Z" fill="#d2a974" opacity="0.45"/>
+  <path d="M0 540 C 90 500, 160 575, 250 530 C 310 500, 340 540, 360 525 L360 640 L0 640 Z" fill="#a96635" opacity="0.22"/>
+  <g stroke="#8a5a33" stroke-width="2" fill="none" opacity="0.28">
+    <path d="M40 330 q 26 -34 52 0"/>
+    <path d="M296 300 q 22 -28 44 0"/>
+    <path d="M160 220 q 18 -22 36 0"/>
+  </g>
+</svg>

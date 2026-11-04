@@ -1,0 +1,19 @@
+NOTICE
+======
+
+This repository is an independent extraction derived from the Draeva admin
+source code and is maintained separately from that source.
+
+The original source was used as the starting point for the screen structure,
+styling and feature surface. Product-specific branding, imagery, environment
+configuration and service credentials have been removed. No third-party
+component, font, image or other asset from that source is claimed to be
+relicensed by this repository; bundled dependencies remain under their own
+licenses.
+
+The application in this repository is a frontend-only demonstration and API
+adapter. It contains no backend, no production credentials, no real customer
+data and no live service integration.
+
+Unless otherwise stated, the source code in this repository is licensed under
+the GNU Affero General Public License, version 3 only. See LICENSE.
